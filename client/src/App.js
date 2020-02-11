@@ -6,6 +6,11 @@ import Navigation from './components/Navigation';
 import Home from './components/Home';
 import Status from './components/Status';
 import History from './components/History'
+import Navbar from 'react-bootstrap/Navbar'
+import Container from "react-bootstrap/Container";
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Nav from 'react-bootstrap/Navbar'
 
 class App extends React.Component {
   constructor(props) {
@@ -55,8 +60,10 @@ class App extends React.Component {
           {/*  </a>*/}
           {/*  <p className="App-intro">API Result: {this.state.apiResponse}</p>*/}
           {/*</header>*/}
-
         </div>
+
+
+
     );
   }
 }

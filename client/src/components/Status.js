@@ -64,10 +64,14 @@ class Status extends React.Component {
         return (
             <div>
                 <h1>Device Status</h1>
-
+                <hr>
+                </hr>
                 {/*<p className="App-intro">API Result: {this.state.apiResponse}</p>*/}
-                <p className="App-intro">API Result: {JSON.stringify(listitems)}</p>
                 <TableOutput data={this.state.apiResponse} />
+                <hr></hr>
+                <i className="fas fa-camera fa-xs"></i>
+
+                <p className="App-intro">API Result: {JSON.stringify(listitems)}</p>
             </div>
         );
     }

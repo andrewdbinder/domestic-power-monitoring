@@ -2,6 +2,7 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
+import logo from "../gary.png";
 
 import {NavLink} from 'react-router-dom';
 
@@ -9,7 +10,17 @@ const Navigation = () => {
     return (
         <Navbar bg="dark" variant="dark" expand="lg">
 
-            <Navbar.Brand>Energy Monitor</Navbar.Brand>
+            <Navbar.Brand>
+                <img
+                    alt=""
+                    src={logo}
+                    width="30"
+                    height="30"
+                    className="d-inline-block align-top"
+                />{' '}
+                Energy Monitor
+            </Navbar.Brand>
+
             <Navbar.Toggle aria-controls="basic-navbar-nav"/>
             <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="ml-auto">
