@@ -1,7 +1,9 @@
 import React from 'react';
 import logo from "../masoon.png";
 import { Line } from 'react-chartjs-2';
-
+import Container from 'react-bootstrap/Container'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
 
 class history extends React.Component {
     constructor(props) {
@@ -72,9 +74,13 @@ class history extends React.Component {
                 </hr>
                 {/*<img src={logo} className="App-logo" alt="logo"/>*/}
 
-                <div>
+                <Container>
                     <Line data={chart} />
-                </div>
+                </Container>
+
+                {/*<div>*/}
+                {/*    <Line data={chart} />*/}
+                {/*</div>*/}
 
                 <p>{JSON.stringify(response)}</p>
             </div>
