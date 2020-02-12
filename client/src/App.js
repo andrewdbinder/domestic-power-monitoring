@@ -11,21 +11,19 @@ import Container from "react-bootstrap/Container";
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Nav from 'react-bootstrap/Navbar'
+import { withRouter } from "react-router";
+
+
+const NavigationWithRouter = withRouter(Navigation);
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { apiResponse: "" };
   }
 
-  callAPI() {
-    fetch("http://172.18.70.4:9000/testAPI")
-        .then(res => res.text())
-        .then(res => this.setState({ apiResponse: res }));
-  }
 
   componentWillMount() {
-    this.callAPI();
+    document.title = "Power Monitor"
   }
 
   render() {
@@ -34,7 +32,7 @@ class App extends React.Component {
 
           <BrowserRouter>
             <div>
-              <Navigation />
+              <NavigationWithRouter />
               <Switch>
                 <Route path="/" component={Home} exact/>
                 <Route path="/status" component={Status}/>

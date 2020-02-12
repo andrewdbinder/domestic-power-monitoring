@@ -46,7 +46,7 @@ app.use(function(err, req, res, next) {
 
 const net = require('net');
 const port = 7060;
-const host = '127.0.0.1';
+const host = '172.18.70.4';
 
 const server = net.createServer();
 server.listen(port, host, () => {
