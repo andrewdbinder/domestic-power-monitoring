@@ -25,34 +25,6 @@ class Status extends React.Component {
     }
 
     render() {
-    //     const listitems = [
-    //         {
-    //             id: '88d27e',
-    //             usage: 1600,
-    //             status: "Online"
-    //         },
-    //         {
-    //             id: '329a3f',
-    //             usage: 153,
-    //             status: "Online"
-    //         },
-    //         {
-    //             id: '3996fc',
-    //             usage: 413,
-    //             status: "Online"
-    //         },
-    //         {
-    //             id: 'af80fa',
-    //             usage: 2,
-    //             status: "Online"
-    //         },
-    //         {
-    //             id: '057b7a',
-    //             usage: -1,
-    //             status: "Offline"
-    //         }
-    // ];
-
         let listitems = this.state.apiResponse;
 
         console.log(listitems);

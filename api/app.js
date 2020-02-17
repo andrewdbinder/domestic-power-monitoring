@@ -9,6 +9,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var testAPIRouter = require("./routes/testAPI");
 var getDevices = require("./routes/getDevices");
+var testTCP = require("./routes/TCPServer");
+
 
 var app = express();
 
@@ -27,6 +29,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/testAPI", testAPIRouter);
 app.use("/getDevices", getDevices);
+app.use("/testTCP", testTCP);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -43,46 +46,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-const net = require('net');
-const port = 7060;
-const host = '192.168.1.102';
-
-const server = net.createServer();
-server.listen(port, host, () => {
-  console.log('TCP Server is running on port ' + port +'.');
-});
-
-let sockets = [];
-
-server.on('connection', function(sock) {
-  console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
-  sockets.push(sock);
-
-  sock.on('data', function(data) {
-    console.log('DATA ' + sock.remoteAddress + ': ' + data);
-    // Write the data back to all the connected, the client will receive it as data from the server
-    sockets.forEach(function(sock, index, array) {
-      sock.write(sock.remoteAddress + ':' + sock.remotePort + " said daniel hackerman, but " + data + '\n');
-      // sock.write('My name is Andrew' + '\n');
-    });
-  });
-
-  // Add a 'close' event handler to this instance of socket
-  sock.on('close', function(data) {
-    let index = sockets.findIndex(function(o) {
-      return o.remoteAddress === sock.remoteAddress && o.remotePort === sock.remotePort;
-    })
-    if (index !== -1) sockets.splice(index, 1);
-    console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
-  });
-
-  sock.on('error', function(e) {
-    console.log('Socket error:', e);
-  });
-
-});
-
-
 
 module.exports = app;

@@ -28,6 +28,7 @@ const Navigation = props => {
                     <Nav.Link href="/">Home</Nav.Link>
                     <Nav.Link href="/status">Status</Nav.Link>
                     <Nav.Link href="/history">History</Nav.Link>
+                    <Nav.Link>⚙</Nav.Link>
                 </Nav>
             </Navbar.Collapse>
 
