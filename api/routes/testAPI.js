@@ -15,6 +15,7 @@ con.connect(function (err) {
 });
 
 router.get('/', function (req, res, next) {
+    console.log(req.headers);
     con.query("SELECT * FROM powermonitoring.powerusage WHERE MeasurementTime BETWEEN CAST('2020-02-05 23:00:00' AS DATETIME) AND CAST('2020-02-06 4:00:00' AS DATETIME);", function (err, result, fields) {
         // if (err) throw err;
         // console.log(result);

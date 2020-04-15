@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ListGroup from 'react-bootstrap/ListGroup'
-
+import Alert from 'react-bootstrap/Alert'
 
 
 // const About = () => {
@@ -15,7 +15,7 @@ class Status extends React.Component {
     }
 
     callAPI() {
-        fetch("http://172.18.70.4:9000/getDevices")
+        fetch("http://192.168.1.218:9000/getDevices")
             .then(res => res.json())
             .then(res => this.setState({ apiResponse: res }));
     }
@@ -23,6 +23,7 @@ class Status extends React.Component {
     componentWillMount() {
         this.callAPI();
     }
+
 
     render() {
         let listitems = this.state.apiResponse;
@@ -43,7 +44,7 @@ class Status extends React.Component {
                 <hr></hr>
                 <i className="fas fa-camera fa-xs"></i>
 
-                <p className="App-intro">API Result: {JSON.stringify(listitems)}</p>
+                {/*<p className="App-intro">API Result: {JSON.stringify(listitems)}</p>*/}
             </div>
         );
     }
@@ -57,8 +58,6 @@ class TableOutput extends React.Component {
         // this.getRowsData = this.getRowsData.bind(this);
         // this.getKeys = this.getKeys.bind(this);
     }
-
-
 
 
     render() {

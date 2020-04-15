@@ -15,7 +15,7 @@ con.connect(function (err) {
 });
 
 router.get('/', function (req, res, next) {
-    console.log(JSON.stringify(req.headers));
+    // console.log(req.headers);
     con.query("SELECT * FROM powermonitoring.devices", function (err, result, fields) {
         // if (err) throw err;
         // console.log(result);

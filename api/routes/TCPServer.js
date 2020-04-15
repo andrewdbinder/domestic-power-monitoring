@@ -3,7 +3,7 @@ let router = express.Router();
 
 const net = require('net');
 const port = 7060;
-const host = '192.168.1.102';
+const host = '192.168.1.218';
 
 const server = net.createServer();
 
@@ -31,7 +31,7 @@ server.on('connection', function(sock) {
     sock.on('close', function(data) {
         let index = sockets.findIndex(function(o) {
             return o.remoteAddress === sock.remoteAddress && o.remotePort === sock.remotePort;
-        })
+        });
         if (index !== -1) sockets.splice(index, 1);
         console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
     });
@@ -47,10 +47,22 @@ router.get('/', function (req, res, next) {
         console.log('Listening to sockets[0]: ' + sockets[0].remoteAddress);
         // sockets.forEach(function(sock, index, array) {
         // sockets[0].write('I once again asking for your API response: ' + '\n');
-        sockets[0].write('0' + '\0');
+        // console.log(JSON.stringify(req.headers));
+        // console.log(JSON.stringify(req.get('data')));
+        sockets[0].write(req.get('data') + '\0');
+        sockets[0].setTimeout(5000, function(){
+            try {
+                res.send('Socket Timeout');
+            }
+            catch(ERR_HTTP_HEADERS_SENT) {
+                console.log('Header already sent')
+            }
+        //     // sockets[0].end();
+        });
+
         console.log('Sent ' + sockets[0].remoteAddress + ' 0');
         sockets[0].once('data', function (data) {
-            console.log('DATA ' + sockets[0].remoteAddress + ': ' + data);
+            // console.log('DATA ' + sockets[0].remoteAddress + ': ' + data);
             console.log(data);
             // sockets[0].setTimeout(3000);
             // sockets[0].once('timeout', () => {
@@ -58,7 +70,12 @@ router.get('/', function (req, res, next) {
             //     res.send('Socket timeout');
             //     sockets[0].end();
             // });
-            res.send(String(data).replace('\0', ''));
+            try {
+                res.send(String(data).replace('\0', '').replace('\n', ''));
+            }
+            catch(ERR_HTTP_HEADERS_SENT) {
+                console.log('Header already sent')
+            }
         });
 
     } else {
