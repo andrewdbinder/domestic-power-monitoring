@@ -1,23 +1,23 @@
 import React from 'react';
-import logo from "../masoon.png";
+// import logo from "../masoon.png";
 import { Line } from 'react-chartjs-2';
 import Container from 'react-bootstrap/Container'
-import DropdownButton from 'react-bootstrap/DropdownButton'
-import DropdownItem from 'react-bootstrap/DropdownItem'
+// import DropdownButton from 'react-bootstrap/DropdownButton'
+// import DropdownItem from 'react-bootstrap/DropdownItem'
 import Dropdown from 'react-bootstrap/Dropdown'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+// import Row from 'react-bootstrap/Row'
+// import Col from 'react-bootstrap/Col'
 import DatePicker from "react-datepicker";
 import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
-import Form from 'react-bootstrap/Form'
+// import FormControl from 'react-bootstrap/FormControl'
+// import Form from 'react-bootstrap/Form'
 import "react-datepicker/dist/react-datepicker.css"
 import './react-datepicker.css'
 // import 'react-datepicker/dist/react-datepicker-cssmodules.css'
-import moment from "moment";
+// import moment from "moment";
 
 class CalendarSearch extends React.Component {
     constructor(props) {
@@ -25,7 +25,6 @@ class CalendarSearch extends React.Component {
     }
 
     render() {
-        console.log(this);
         return (
                     <ButtonGroup>
                         <InputGroup>
@@ -80,55 +79,93 @@ class CalendarSearch extends React.Component {
 class history extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { TestapiResponse : [],
+        this.state = {
+            TestapiResponse : [],
             devices : [],
+            friendlyName: [{"FriendlyName": "undefined"}],
             startDate: new Date(),
             endDate: new Date(),
             minTime: new Date()};
 
-        this.state.startDate.setDate(this.state.startDate.getDate() - 1)
-        this.state.minTime.setHours(0)
-        this.state.minTime.setMinutes(0)
-        this.state.minTime.setTime(0)
+        this.state.startDate.setDate(this.state.startDate.getDate() - 1);
+        this.state.minTime.setHours(0);
+        this.state.minTime.setMinutes(0);
+        this.state.minTime.setTime(0);
         // this.state = {}
         // startDate:
+        this.handleClick = this.handleClick.bind(this);
+
     }
 
     callTestAPI() {
+        fetch("http://192.168.1.218:9000/testAPI")
+            .then(res => res.json())
+            .then(res => this.setState({ testapiResponse: res }));
+    }
+
+    getFriendlyName(device) {
+        fetch("http://192.168.1.218:9000/getFriendlyName", {
+            headers:  {
+                'device': device
+            }
+        })
+            .then(res => res.json())
+            .then(res => this.setState({ friendlyName: res }));
+    }
+
+    getGraphData(devices) {
+        console.log(this.state.startDate.toJSON());
+        console.log(this.state.startDate.toLocaleDateString());
         fetch("http://192.168.1.218:9000/testAPI", {
-            headers: new Headers( {'test': '5000'})
+            headers:  {
+                'startdate': this.state.startDate.toISOString(),
+                'enddate': this.state.endDate.toISOString(),
+                'devices': devices
+            }
         })
             .then(res => res.json())
             .then(res => this.setState({ TestapiResponse: res }));
     }
 
     callDevices() {
-        fetch("http://192.168.1.218:9000/getDevices")
+        fetch("http://192.168.1.218:9000/getDevices", {
+            // headers: new Headers({'devices': this.state.devices.toString()}), header
+        })
             .then(res => res.json())
             .then(res => this.setState({ devices: res }));
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.callDevices();
-        this.callTestAPI();
+        this.getGraphData();
     }
 
     ToggleSearch(DeviceID) {
         let newstate = this.state;
 
         for (const device of newstate.devices) {
-            if (device.active !== true) {
-                device.active = false;
-            }
-            if (device.DeviceID === DeviceID) {
-                device.active = !device.active;
-            }
+            device.active = device.DeviceID === DeviceID;
         }
+
+        this.getFriendlyName(DeviceID);
 
         this.setState({newstate});
         // this.forceUpdate();
         // $(this)
-        console.log(this.state.apiResponse)
+        // console.log(this.state.apiResponse)
+    }
+
+    handleClick(e) {
+        e.preventDefault();
+        let testDevices = [];
+
+        for (const device of this.state.devices) {
+            if (device.active === true) {
+                testDevices.push(device.DeviceID);
+            }
+        }
+
+       this.getGraphData(testDevices);
     }
 
     handleStartChange = date => {
@@ -144,7 +181,7 @@ class history extends React.Component {
     };
 
     render() {
-        console.log(this.state);
+        // console.log(this.state);
         let response = this.state.TestapiResponse;
 
         let labels = response.map(function(e) {
@@ -156,14 +193,17 @@ class history extends React.Component {
         });
 
         let Device = response.map(function(e) {
-            return e.Device[0];
+            return e.Device;
         });
+
+        console.log(JSON.stringify(this.state.friendlyName));
+        console.log(this.state.friendlyName[0].FriendlyName);
 
         let chart = {
             labels: labels,
             datasets: [
                 {
-                    label: 'Microwave',
+                    label: this.state.friendlyName[0].FriendlyName,
                     fill: true,
                     lineTension: 0.1,
                     backgroundColor: 'rgba(150,41,77,0.4)',
@@ -238,10 +278,31 @@ class history extends React.Component {
                                    handleEndChange = {e => this.handleEndChange(e) }
                                    />
 
-                        <Dropdown className='mx-3'>
-                            <Dropdown.Toggle variant='outline-secondary'>
-                                Device
-                            </Dropdown.Toggle>
+                        {/*<Dropdown className='mx-3'>*/}
+                        {/*    <Dropdown.Toggle variant='light'>*/}
+                        {/*        Device*/}
+                        {/*    </Dropdown.Toggle>*/}
+
+                        {/*    <Dropdown.Menu>*/}
+                        {/*        {this.state.devices.map(device =>*/}
+                        {/*            <Dropdown.Item*/}
+                        {/*                active = { device.active }*/}
+                        {/*                key = { device.DeviceID }*/}
+                        {/*                onClick = { () => { this.ToggleSearch(device.DeviceID) } }*/}
+                        {/*                // onClick = { () => this.toggleClass() }*/}
+                        {/*            > { device.FriendlyName } </Dropdown.Item>*/}
+                        {/*        )}*/}
+                        {/*        /!*<this.GetItems/>*!/*/}
+                        {/*        /!*<Dropdown.Item href="#/action-1">Action</Dropdown.Item>*!/*/}
+                        {/*        /!*<Dropdown.Item href="#/action-2">Another action</Dropdown.Item>*!/*/}
+                        {/*        /!*<Dropdown.Item href="#/action-3">Something else</Dropdown.Item>*!/*/}
+                        {/*    </Dropdown.Menu>*/}
+                        {/*</Dropdown>*/}
+
+                        <Dropdown className='ml-3' as={ButtonGroup}>
+                            <Button variant="light" onClick={this.handleClick}>Search</Button>
+
+                            <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
 
                             <Dropdown.Menu>
                                 {this.state.devices.map(device =>
@@ -252,16 +313,12 @@ class history extends React.Component {
                                         // onClick = { () => this.toggleClass() }
                                     > { device.FriendlyName } </Dropdown.Item>
                                 )}
-                                {/*<this.GetItems/>*/}
-                                {/*<Dropdown.Item href="#/action-1">Action</Dropdown.Item>*/}
-                                {/*<Dropdown.Item href="#/action-2">Another action</Dropdown.Item>*/}
-                                {/*<Dropdown.Item href="#/action-3">Something else</Dropdown.Item>*/}
                             </Dropdown.Menu>
                         </Dropdown>
 
-                        <ButtonGroup>
-                            <Button variant='outline-success'> Search </Button>
-                        </ButtonGroup>
+                        {/*<ButtonGroup>*/}
+                        {/*    <Button variant='light' onClick={this.handleClick}> Search </Button>*/}
+                        {/*</ButtonGroup>*/}
                     </ButtonToolbar>
 
 
@@ -269,14 +326,9 @@ class history extends React.Component {
                 <Container>
                     <Line data={chart} options={options}/>
                 </Container>
-
-
                 <hr/>
-                {/*<div>*/}
-                {/*    <Line data={chart} />*/}
-                {/*</div>*/}
 
-                {/*<p>{JSON.stringify(response)}</p>*/}
+                {/*<p> {JSON.stringify(this.state.TestapiResponse)} </p>*/}
             </div>
         );
     };

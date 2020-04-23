@@ -16,16 +16,14 @@ con.connect(function (err) {
 
 router.get('/', function (req, res, next) {
     // console.log(req.headers);
+    let sql =  "SELECT FriendlyName FROM powermonitoring.devices WHERE DeviceID = ?;";
+    let params = [req.get('device')];
 
-    con.query("SELECT * FROM powermonitoring.devices", function (err, result, fields) {
-        // if (err) throw err;
-        // console.log(result);
-        console.log('Querying Devices Table');
+    console.log(mysql.format(sql, params));
 
-        // Call a function to generate packet
-        // Send the generated packet
-        // Receive the packet
-        // send the packet as a http response
+    con.query(mysql.format(sql, params), function (err, result, fields) {
+
+        console.log('Getting Friendly Name');
 
         res.send(result);
     });

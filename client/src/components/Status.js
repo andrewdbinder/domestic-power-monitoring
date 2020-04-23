@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ListGroup from 'react-bootstrap/ListGroup'
-import Alert from 'react-bootstrap/Alert'
+// import Alert from 'react-bootstrap/Alert'
 
 
 // const About = () => {
@@ -58,6 +58,8 @@ class TableOutput extends React.Component {
         // this.getRowsData = this.getRowsData.bind(this);
         // this.getKeys = this.getKeys.bind(this);
     }
+
+
 
 
     render() {

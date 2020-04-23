@@ -1,16 +1,16 @@
 import React from 'react';
-import logo from './logo.svg';
+// import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './components/Home';
 import Status from './components/Status';
 import History from './components/History'
-import Navbar from 'react-bootstrap/Navbar'
-import Container from "react-bootstrap/Container";
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Nav from 'react-bootstrap/Navbar'
+// import Navbar from 'react-bootstrap/Navbar'
+// import Container from "react-bootstrap/Container";
+// import Row from 'react-bootstrap/Row'
+// import Col from 'react-bootstrap/Col'
+// import Nav from 'react-bootstrap/Navbar'
 import { withRouter } from "react-router";
 
 
@@ -22,7 +22,7 @@ class App extends React.Component {
   }
 
 
-  componentWillMount() {
+  componentDidMount() {
     document.title = "Power Monitor"
   }
 
