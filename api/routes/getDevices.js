@@ -16,8 +16,14 @@ con.connect(function (err) {
 
 router.get('/', function (req, res, next) {
     // console.log(req.headers);
+    let sql = '';
 
-    con.query("SELECT * FROM powermonitoring.devices", function (err, result, fields) {
+    if (req.get('active') === 'all') {
+        sql = "SELECT * FROM powermonitoring.devices"
+    } else {
+        sql = "SELECT * FROM powermonitoring.devices WHERE active = '1'"
+    }
+    con.query(mysql.format(sql), function (err, result, fields) {
         // if (err) throw err;
         // console.log(result);
         console.log('Querying Devices Table');

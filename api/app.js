@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 var testAPIRouter = require("./routes/testAPI");
 var getDevices = require("./routes/getDevices");
 var getFriendlyName = require("./routes/getFriendlyName");
+var manageDevices = require("./routes/manageDevices");
 var testTCP = require("./routes/TCPServer");
 
 
@@ -30,6 +31,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/testAPI", testAPIRouter);
 app.use("/getDevices", getDevices);
+app.use("/manageDevices", manageDevices);
 app.use("/getFriendlyName", getFriendlyName);
 app.use("/testTCP", testTCP);
 
