@@ -84,6 +84,7 @@ router.get('/', function (req, res, next) {
     }
 });
 
+// Handle new (unprompted) messages to server
 server.on('connection', function(sock) {
     console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
 

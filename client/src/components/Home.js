@@ -2,6 +2,7 @@ import React  from 'react';
 import logo from "../ScaryJD.png";
 import Button from 'react-bootstrap/Button'
 
+//unused module, was used for testing
 class home extends React.Component {
     constructor(props) {
         super(props);
