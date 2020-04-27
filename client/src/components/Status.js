@@ -64,18 +64,22 @@ class DeviceEntry extends React.Component {
 
     componentDidMount() {
         this.CheckAvailable();
-        console.log(this.state.available)
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log(this.state.data);
         if (prevState.available !== this.state.available) {
-            this.PingDevice()
+            this.PingDevice();
+            this.interval = setInterval(() => (this.CheckAvailable()), 3000);
+            this.interval = setInterval(() => (this.PingDevice()), 3000);
         }
     }
 
     CheckAvailable() {
-        fetch("http://192.168.1.218:9000/testTCP", {
+        fetch("http://192.168.1.218:9000/TCPServer", {
             headers: {
                 'action': 'checkavailable',
                 'device': this.state.deviceID
@@ -87,7 +91,8 @@ class DeviceEntry extends React.Component {
     }
 
     PingDevice() {
-        fetch("http://192.168.1.218:9000/testTCP", {
+        // this.setState({data : []});
+        fetch("http://192.168.1.218:9000/TCPServer", {
             headers: {
                 'action': 'pingdevice',
                 'device': this.state.deviceID
@@ -122,7 +127,7 @@ class DeviceEntry extends React.Component {
                                             <tbody>
                                             <tr>
                                                 <th>Mean Power:</th>
-                                                <th>{this.state.data.PMean*1000} W</th>
+                                                <th>{this.state.data.PMean} W</th>
                                             </tr>
 
                                             <tr>
@@ -141,12 +146,13 @@ class DeviceEntry extends React.Component {
                                             </tr>
                                             </tbody>
                                         </Table>
+                                        This data updates every 3 seconds.
                                     </Popover.Content>
                                 </Popover>
                             }
                         >
                             <Button variant={this.state.available ? 'outline-primary' : 'outline-danger'} disabled={!this.state.available}>
-                                {(this.state.data.PMean === undefined) ? (this.state.available) ? 'Loading...' : 'N/A' : parseInt(this.state.data.PMean*1000) + ' W'}
+                                {(this.state.data.PMean === undefined) ? (this.state.available) ? 'Loading...' : 'N/A' : parseInt(this.state.data.PMean) + ' W'}
                             </Button>
                         </OverlayTrigger>{' '}
                     </Col>

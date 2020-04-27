@@ -1,11 +1,23 @@
 let mysql = require('mysql');
 
+// Configure DB connection here
+// Never use root to connect to database lol
 let db_config = {
     host: "localhost",
     user: "root",
     password: "lolo"
 };
 
+// Configure TCP server Here
+const port = 7060;
+const host = '192.168.1.218';
+
+
+
+
+// Exports used in other files
+exports.TCP_Port = port;
+exports.TCP_Host = host;
 
 exports.connectToServer = () => {
     let connection = mysql.createConnection(db_config);
@@ -28,5 +40,3 @@ exports.connectToServer = () => {
 
     return connection;
 };
-
-// exports.connect = connectToServer();

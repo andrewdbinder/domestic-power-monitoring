@@ -6,9 +6,11 @@ let powerDB = require('./config');
 
 let connection = powerDB.connectToServer();
 
+// Returns a JSON object of devices requested
 router.get('/', function (req, res, next) {
     let sql = '';
 
+    // Check which devices we want, default to active only
     if (req.get('active') === 'all') {
         sql = "SELECT * FROM powermonitoring.devices"
     } else {
@@ -16,11 +18,7 @@ router.get('/', function (req, res, next) {
     }
     connection.query(mysql.format(sql), function (err, result, fields) {
 
-        // Call a function to generate packet
-        // Send the generated packet
-        // Receive the packet
-        // send the packet as a http response
-
+        // Generate and return HTTP response
         res.send(result);
     });
 });
