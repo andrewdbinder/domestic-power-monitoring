@@ -118,26 +118,28 @@ class DeviceEntry extends React.Component {
                                 <Popover id={`popover-positioned-right`}>
                                     <Popover.Title as="h3">Device Details</Popover.Title>
                                     <Popover.Content>
-                                        <Table borderless sm>
+                                        <Table borderless xs hover>
+                                            <tbody>
                                             <tr>
-                                                <th><strong>Mean Power:</strong></th>
+                                                <th>Mean Power:</th>
                                                 <th>{this.state.data.PMean*1000} W</th>
                                             </tr>
 
                                             <tr>
-                                                <th><strong>Volts:</strong></th>
+                                                <th>Volts:</th>
                                                 <th>{this.state.data.Urms} Vrms</th>
                                             </tr>
 
                                             <tr>
-                                                <th><strong>Frequency:</strong></th>
+                                                <th><>Frequency:</></th>
                                                 <th>{this.state.data.Frequency} Hz</th>
                                             </tr>
 
                                             <tr>
-                                                <th><strong>Power Factor:</strong></th>
+                                                <th><>Power Factor:</></th>
                                                 <th>{this.state.data.PowerFactor}</th>
                                             </tr>
+                                            </tbody>
                                         </Table>
                                     </Popover.Content>
                                 </Popover>
@@ -151,7 +153,7 @@ class DeviceEntry extends React.Component {
                     <Col className="text-center">
                         <Button
 
-                            variant={(this.state.deviceChecked) ? (this.state.available) ? 'success' : 'danger' : 'warning'}>
+                            variant={(this.state.deviceChecked) ? (this.state.available) ? 'success' : 'outline-danger' : 'warning'}>
                             {(this.state.deviceChecked) ? (this.state.available) ? 'Online' : 'Offline' : 'Loading'}
                         </Button>
                     </Col>
