@@ -394,7 +394,6 @@ class AddDevice extends React.Component {
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group as={Col} md="4">
-                        {/*<Form.Label>Submit</Form.Label>*/}
                         <Button size="lg" type="submit">Add Device</Button>
                     </Form.Group>
                 </Form.Row>
