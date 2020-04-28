@@ -269,14 +269,22 @@ function parseRawData(hex, reg) {
             // Unsigned XXX.XX
             return parseInt('0x' + hex)/100;
         case 'Pmean':
-            // Signed kW, convert to W
-            return intToUint(parseInt('0x' + hex), 16);
+            // Signed kW, convert to W, treat as signed
+            let Pmean = parseInt('0x' + hex, 16);
+            if ((Pmean & 0x8000) > 0) {
+                Pmean = Pmean - 0x10000;
+            }
+            return Pmean;
         case 'Freq':
             // Unsigned Hz
             return parseInt('0x' + hex)/100;
         case 'PowerF':
-            // Signed X.XXX
-            return intToUint(parseInt('0x' + hex), 16)/1000;
+            // Signed X.XXX, treat as signed data
+            let PowerF = parseInt('0x' + hex, 16);
+            if ((PowerF & 0x8000) > 0) {
+                PowerF = PowerF - 0x10000;
+            }
+            return PowerF/1000;
         case 'Time':
             return new Date(parseInt('0x' + hex)*1000);
         default:
@@ -284,20 +292,6 @@ function parseRawData(hex, reg) {
     }
 }
 
-// Code from Paul S. on stackoverflow
-// Converts an integer to an unsigned equivalent
-function intToUint(int, nbit) {
-    var u = new Uint32Array(1);
-    nbit = +nbit || 32;
-    if (nbit > 32) throw new RangeError('intToUint only supports ints up to 32 bits');
-    u[0] = int;
-    if (nbit < 32) { // don't accidentally sign again
-        int = Math.pow(2, nbit) - 1;
-        return u[0] & int;
-    } else {
-        return u[0];
-    }
-}
 
 // Convert date to timezone shifted date
 function convertUTCDateToLocalDate(date) {
