@@ -4,10 +4,14 @@ let mysql = require('mysql');
 
 let powerDB = require('./config');
 
-let connection = powerDB.connectToServer();
+// Connect to DB
+let connection = powerDB.connection;
+
+// Handle server disconnects
+powerDB.handleDisconnect(connection);
 
 // Handles control of device table in database
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
     let action = req.get('action');
     let sql = '';
     let params = [];
@@ -33,7 +37,7 @@ router.get('/', function (req, res, next) {
             console.log(action);
     }
 
-    connection.query(mysql.format(sql, params), function (err, result, fields) {
+    connection.query(mysql.format(sql, params), function (err, result) {
         res.send([result, err]);
         console.log(err);
     });

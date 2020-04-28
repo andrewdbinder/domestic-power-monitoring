@@ -3,14 +3,18 @@ let router = express.Router();
 let powerDB = require('./config');
 let mysql = require('mysql');
 
-let connection = powerDB.connectToServer();
-
 // For byte packing
 let Struct = require('struct');
 
 const net = require('net');
 const port = powerDB.TCP_Port;
 const host = powerDB.TCP_Host;
+
+// Connect to DB
+let connection = powerDB.connection;
+
+// Handle server disconnects
+powerDB.handleDisconnect(connection);
 
 // Start TCP Server
 const server = net.createServer();
@@ -34,7 +38,7 @@ const SUBTYPE = Object.freeze({
 });
 
 // Handle HTTP requests
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
     // Two options, check available devices and ping device
     switch (req.get('action')) {
         // Checks whether a specified device is connected to the TCP server
@@ -121,7 +125,7 @@ server.on('connection', function(sock) {
     });
 
     // Add a 'close' event handler to this instance of socket
-    sock.on('close', function(data) {
+    sock.on('close', function() {
         let index = sockets.findIndex(function(o) {
             return o.remoteAddress === sock.remoteAddress && o.remotePort === sock.remotePort;
         });

@@ -4,10 +4,14 @@ let mysql = require('mysql');
 
 let powerDB = require('./config');
 
-let connection = powerDB.connectToServer();
+// Connect to DB
+let connection = powerDB.connection;
+
+// Handle server disconnects
+powerDB.handleDisconnect(connection);
 
 // Main function for getting graph data
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
     // Get date range headers
     let startDateHdr = new Date(req.get('startdate'));
     let endDateHdr = new Date(req.get('enddate'));
@@ -26,7 +30,7 @@ router.get('/', function (req, res, next) {
                 " AND Device = ?;";
 
     // Make request to DB, using mysql.format for query generation
-    connection.query(mysql.format(sql, params), function (err, result, fields) {
+    connection.query(mysql.format(sql, params), function (err, result) {
         res.send(result);
     });
 

@@ -19,24 +19,26 @@ const host = '192.168.1.218';
 exports.TCP_Port = port;
 exports.TCP_Host = host;
 
-exports.connectToServer = () => {
-    let connection = mysql.createConnection(db_config);
+exports.db_config = db_config;
 
-    connection.connect(function(err) {
-        if(err) {
-            console.log('error when connecting to db:', err);
-            setTimeout(connectToServer, 2000); // We introduce a delay before attempting to reconnect
+exports.connection = mysql.createConnection(db_config);
+
+exports.handleDisconnect = (conn) => {
+    conn.on('error', function(err) {
+        if (!err.fatal) {
+            return;
         }
-    });
 
-    connection.on('error', function(err) {
-        console.log('db error', err);
-        if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-            connectToServer();
-        } else {
+        if (err.code !== 'PROTOCOL_CONNECTION_LOST') {
             throw err;
         }
+
+        console.log('Re-connecting lost connection: ' + err.stack);
+
+        exports.connection = mysql.createConnection(db_config);
+        handleDisconnect(exports.connection);
+        exports.connection.connect();
     });
 
-    return connection;
+    return exports.connection;
 };
