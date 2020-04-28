@@ -9,22 +9,31 @@ import Form from 'react-bootstrap/Form'
 import ListGroup from 'react-bootstrap/ListGroup'
 import Modal from 'react-bootstrap/Modal'
 
-
-
-// const About = () => {
+// Main Module definition
 class Settings extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-                        dbDeviceState : [],
-                        newDeviceState : [],
-                        changes: false,
-                        isLoading: false,
-                        modifyresult: []};
+            dbDeviceState : [],
+            changes: false,
+            isLoading: false};
         this.UpdateTable = this.UpdateTable.bind(this);
         this.modifyTable = this.modifyTable.bind(this);
     }
 
+    // When page loads, request list of all devices
+    componentDidMount() {
+        this.getDevices();
+    }
+
+    // On page update, check of the state of the db has changes re: active devices
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.dbDeviceState !== prevState.dbDeviceState) {
+            this.createNewDeviceState();
+        }
+    }
+
+    // Make HTTP request to back-end db, update state
     getDevices() {
         fetch("http://192.168.1.218:9000/getDevices", {
             headers: {
@@ -35,8 +44,12 @@ class Settings extends React.Component {
             .then(res => this.setState({ dbDeviceState: res }));
     }
 
+    // Make change to active state of devices when save changes button is pressed
     modifyTable(e) {
+        // Disable save changes button
         this.setState( {changes: false });
+
+        // Logic to search for changed devices and save the changes
         for (const device of this.state.dbDeviceState) {
             if (device.newActive !== device.selected) {
                 fetch("http://192.168.1.218:9000/manageDevices", {
@@ -50,26 +63,19 @@ class Settings extends React.Component {
                     .then(res => this.setState({result: res}))
                     .then((res) => {
                         console.log(res);
+                        // After device successfully toggles, update the table
                         this.UpdateTable(e);
                     });
             }
         }
-        // this.handleClose();
-
     }
 
-    componentDidMount() {
-        this.getDevices();
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.state.dbDeviceState !== prevState.dbDeviceState) {
-            this.createNewDeviceState();
-        }
-    }
-
+    // Creates some additional fields from db response containing theme variants and modified tag
     createNewDeviceState() {
+        // Make copy of state
         let newstate = this.state;
+
+        // Setup every device from the database response
         for (const device of newstate.dbDeviceState) {
             device.active = Boolean(device.active);
             if (!device.hasOwnProperty('modified') || !device.modified) {
@@ -83,9 +89,11 @@ class Settings extends React.Component {
             }
         }
 
+        // Update state of instance
         this.setState({newstate});
     }
 
+    // Check if save changes button should be enabled
     determineChanges() {
         let newstate = this.state;
         newstate.changes = false;
@@ -96,35 +104,35 @@ class Settings extends React.Component {
             }
         }
 
+        // Rerun state setup
         this.createNewDeviceState();
         this.setState({newstate});
     }
 
+    // Handle toggling devices theme variant and new state
     handleClick(deviceID) {
-        // e.preventDefault();
-
-        // console.log(deviceID);
-
+        // Find device in table
         for (const device of this.state.dbDeviceState) {
+            // Once it's found, toggle the newActive and modified fields
             if (device.DeviceID === deviceID) {
                 device.newActive = !device.newActive;
                 device.modified = !device.modified;
 
+                // Update variants
                 if (device.newActive !== device.selected) {
                     device.modified = true;
                     device.variant = 'warning'
                 } else {
                     device.modified = false;
                 }
-                console.log(device)
-
-                console.log('toggling')
             }
         }
 
+        // Handle additional theme and state changes
         this.determineChanges();
     }
 
+    // Reload the table from scratch from the database
     UpdateTable(e) {
         e.preventDefault();
         this.getDevices();
@@ -138,31 +146,84 @@ class Settings extends React.Component {
                 <h3>Manage Current Devices</h3>
                 <Container>
                     <ListGroup className="list-group">
-                        <TableOutput UpdateTable={this.UpdateTable} data={this.state.dbDeviceState} handleClick={deviceID => this.handleClick(deviceID)} />
+                        <TableOutput
+                            UpdateTable={this.UpdateTable}
+                            data={this.state.dbDeviceState}
+                            handleClick={deviceID => this.handleClick(deviceID)}
+                        />
                         <ListGroup.Item>
                             <Col className="text-center">
-                                <Button block onClick={this.modifyTable} disabled={!this.state.changes} variant='primary'>
+                                <Button
+                                    block
+                                    onClick={this.modifyTable}
+                                    disabled={!this.state.changes}
+                                    variant='primary'
+                                >
                                     Save Changes
                                 </Button>
                             </Col>
                         </ListGroup.Item>
                     </ListGroup>
                     <h3 className="mt-5">New Device</h3>
-
                     <ListGroup className="list-group">
                         <ListGroup.Item >
                             <AddDevice UpdateTable={this.UpdateTable}/>
                         </ListGroup.Item>
                     </ListGroup>
                 </Container>
-
-
-                {/*<p className="App-intro">API Result: {JSON.stringify(listitems)}</p>*/}
             </div>
         );
     }
 }
 
+// Output Table of database results, combined with user modification components
+class TableOutput extends React.Component {
+    render() {
+        return (
+            this.props.data.map(listitem => (
+                <ListGroup.Item key={listitem.DeviceID}>
+                    <Row>
+                        <Col className="text-center">
+                            <h5>{listitem.FriendlyName}</h5>
+                        </Col>
+                        <Col className="text-center">
+                            <h5>{listitem.DeviceID}</h5>
+                        </Col>
+                        <Col className="text-center">
+                            <Dropdown as={ButtonGroup}>
+                                <Button
+                                    variant={listitem.variant}
+                                    onClick = { () => { this.props.handleClick(listitem.DeviceID) } }
+                                >
+                                    {/* Logic to determine button label */}
+                                    {(listitem.modified) ? (listitem.newActive) ? 'Enable' : 'Disable' :
+                                        (listitem.active) ?  'Enabled' : 'Disabled'}
+                                </Button>
+
+                                <Dropdown.Toggle
+                                    split
+                                    variant={listitem.variant}
+                                    id="dropdown-split-basic"
+                                />
+
+                                <Dropdown.Menu>
+                                    {/* Pass appropriate methods and names to delete device */}
+                                    <DeleteDevice
+                                        UpdateTable={e => this.props.UpdateTable(e)}
+                                        FriendlyName={listitem.FriendlyName}
+                                        DeviceID={listitem.DeviceID}
+                                    />
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </Col>
+                    </Row>
+                </ListGroup.Item>
+            ))
+        );
+    }
+}
+
+// Handle delete buttons, we want a delete device confirmation
 class DeleteDevice extends React.Component {
     constructor(props){
         super(props);
@@ -175,13 +236,18 @@ class DeleteDevice extends React.Component {
         this.Delete = this.Delete.bind(this);
     }
 
-
+    // Handle state for popup of Modal
     handleClose = () => this.setState({show: false});
     handleShow = () => this.setState({show: true});
 
+    // Back-end call to remove device from device table
     Delete(e, device) {
         e.preventDefault();
+
+        // Disable button after first click
         this.setState( {isLoading: true });
+
+        // Make Request to backend
         fetch("http://192.168.1.218:9000/manageDevices", {
             headers:  {
                 'action': 'delete',
@@ -190,37 +256,46 @@ class DeleteDevice extends React.Component {
         })
             .then(res => res.json())
             .then(res => this.setState({ result: res }))
-            .then((res) => {
-                console.log(res);
+            .then(() => {
+                // On successful response, close popup and update parent's table
                 this.handleClose();
                 this.props.UpdateTable(e);
             });
-
-        console.log(e)
     }
 
     render() {
         return (
             <>
-                <Dropdown.Item /*variant="danger"*/ onClick={this.handleShow}>
+                <Dropdown.Item onClick={this.handleShow}>
                     Delete
                 </Dropdown.Item>
 
-                <Modal show={this.state.show} onHide={this.handleClose} aria-labelledby="contained-modal-title-vcenter"
-                       centered>
+                <Modal
+                    show={this.state.show}
+                    onHide={this.handleClose}
+                    aria-labelledby="contained-modal-title-vcenter"
+                    centered
+                >
                     <Modal.Header closeButton>
                         <Modal.Title>Confirm Delete</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         Are you sure you want to delete <b>{this.props.FriendlyName}</b>?
                         <br/>
-                        This action will <i>not</i> remove data with device ID <b>{this.props.DeviceID}</b>.
+                        This action will <i>not</i> remove data associated with device <b>{this.props.DeviceID}</b>.
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={this.handleClose}>
+                        <Button
+                            variant="secondary"
+                            onClick={this.handleClose}
+                        >
                             Cancel
                         </Button>
-                        <Button variant="danger" disabled={this.state.isLoading} onClick={e => this.Delete(e, this.props.DeviceID)} >
+                        <Button
+                            variant="danger"
+                            disabled={this.state.isLoading}
+                            onClick={e => this.Delete(e, this.props.DeviceID)}
+                        >
                             {this.state.isLoading ? 'Deleting…' : 'Delete'}
                         </Button>
                     </Modal.Footer>
@@ -230,6 +305,7 @@ class DeleteDevice extends React.Component {
     }
 }
 
+// Component to handle adding a new device
 class AddDevice extends React.Component {
     constructor(props){
         super(props);
@@ -240,23 +316,9 @@ class AddDevice extends React.Component {
             result : []
         };
         this.handleSubmit = this.handleSubmit.bind(this);
-
     }
 
-    handleSubmit(e) {
-        console.log(this.state);
-        e.preventDefault();
-        e.stopPropagation();
-        this.setValidated();
-
-        if(this.state.deviceID !== '' && this.state.deviceName !== '') {
-            this.addDevice(e, this.state.deviceID, this.state.deviceName);
-            document.getElementById("newDevice").reset();
-            this.setState({validated: false})
-        }
-
-    };
-
+    // Backend call to add device to database
     addDevice(e, deviceID, deviceName) {
         this.setState( {isLoading: true });
         fetch("http://192.168.1.218:9000/manageDevices", {
@@ -268,20 +330,33 @@ class AddDevice extends React.Component {
         })
             .then(res => res.json())
             .then(res => this.setState({ result: res }))
-            .then((res) => {
+            .then(() => {
+                // Update parent's table after response
                 this.props.UpdateTable(e);
             });
-
-        this.forceUpdate();
     }
 
+    // Handle submission button press
+    handleSubmit(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setValidated();
+
+        // Make sure fields aren't empty, then make request and reset form
+        if(this.state.deviceID !== '' && this.state.deviceName !== '') {
+            this.addDevice(e, this.state.deviceID, this.state.deviceName);
+            document.getElementById("newDevice").reset();
+            this.setState({validated: false})
+        }
+
+    };
+
+    // Keep temp variables updated with text box values
     onChange = (e) => {
         this.setState({ [e.target.name]: e.target.value });
     };
 
-
-
-    // validated = () => this.setState({show: this.state.show = false});
+    // Set form validation
     setValidated = () => this.setState({validated: true});
 
     render() {
@@ -324,42 +399,6 @@ class AddDevice extends React.Component {
                     </Form.Group>
                 </Form.Row>
             </Form>
-        );
-    }
-}
-
-class TableOutput extends React.Component {
-    render() {
-        return (
-            this.props.data.map(listitem => (
-                <ListGroup.Item key={listitem.DeviceID}>
-                     <Row>
-                         <Col className="text-center">
-                             <h5>{listitem.FriendlyName}</h5>
-                         </Col>
-                         <Col className="text-center">
-                             <h5>{listitem.DeviceID}</h5>
-                         </Col>
-                        <Col className="text-center">
-
-                                <Dropdown as={ButtonGroup}>
-                                    <Button
-                                        variant={listitem.variant}
-                                        onClick = { () => { this.props.handleClick(listitem.DeviceID) } }>
-                                        {(listitem.modified) ? (listitem.newActive) ? 'Enable' : 'Disable' : (listitem.active) ?  'Enabled' : 'Disabled'}
-                                    </Button>
-
-                                    <Dropdown.Toggle split variant={listitem.variant} id="dropdown-split-basic" />
-
-                                    <Dropdown.Menu>
-                                        <DeleteDevice UpdateTable={e => this.props.UpdateTable(e)} FriendlyName={listitem.FriendlyName} DeviceID={listitem.DeviceID}/>
-                                    </Dropdown.Menu>
-                                </Dropdown>
-
-                        </Col>
-                    </Row>
-                </ListGroup.Item>
-            ))
         );
     }
 }

@@ -7,53 +7,53 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import Popover from 'react-bootstrap/Popover'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
+
+// Main component for status/home page
 class Status extends React.Component {
     constructor(props) {
         super(props);
         this.state = { apiResponse : [] };
     }
 
-    callAPI() {
+    // Call to backend to get current devices
+    getDeviceList() {
         fetch("http://192.168.1.218:9000/getDevices")
             .then(res => res.json())
-            .then(res => this.setState({ apiResponse: res }))}
-
-    componentDidMount() {
-        this.callAPI();
+            .then(res => this.setState({ apiResponse: res }))
     }
 
+    // On page load, get the current devices
+    componentDidMount() {
+        this.getDeviceList();
+    }
+
+    // Create page with ListGroup for devices
     render() {
-        let listitems = this.state.apiResponse;
-
-        console.log(listitems);
-
         return (
             <div>
                 <h1>Device Status</h1>
-                <hr>
-                </hr>
-                {/*<p className="App-intro">API Result: {this.state.apiResponse}</p>*/}
+                <hr/>
                 <Container>
                     <ListGroup className="list-group">
                         {this.state.apiResponse.map(device => (
-                            <DeviceEntry key={device.DeviceID} device={device} />
-                            ))
+                            // Pass devices properties to each individual entry
+                            <DeviceEntry
+                                key={device.DeviceID}
+                                device={device}
+                            />))
                         }
                     </ListGroup>
                 </Container>
                 <hr/>
-                {/*<p className="App-intro">API Result: {JSON.stringify(listitems)}</p>*/}
             </div>
         );
     }
 }
 
+// Generate UI component for a single device in the list
 class DeviceEntry extends React.Component {
     constructor(props){
         super(props);
-        // this.getHeader = this.getHeader.bind(this);
-        // this.getRowsData = this.getRowsData.bind(this);
-        // this.getKeys = this.getKeys.bind(this);
         this.state = {
             deviceID : this.props.device.DeviceID,
             deviceChecked : false,
@@ -62,22 +62,30 @@ class DeviceEntry extends React.Component {
         }
     }
 
+    // On page load, check to see if device is connected
     componentDidMount() {
         this.CheckAvailable();
     }
 
+    // Cancel auto-refresh when page closes
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
+    // If state becomes available, ping device and start auto-refresh of data
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevState.available !== this.state.available) {
-            this.PingDevice();
-            this.interval = setInterval(() => (this.CheckAvailable()), 3000);
-            this.interval = setInterval(() => (this.PingDevice()), 3000);
+            if (this.state.available) {
+                this.PingDevice();
+                this.interval = setInterval(() => (this.CheckAvailable()), 3000);
+                this.interval = setInterval(() => (this.PingDevice()), 3000);
+            } else {
+                clearInterval(this.interval);
+            }
         }
     }
 
+    // Back-end call to see if device is online
     CheckAvailable() {
         fetch("http://192.168.1.218:9000/TCPServer", {
             headers: {
@@ -90,17 +98,19 @@ class DeviceEntry extends React.Component {
             .then(() => this.setState({deviceChecked : true}));
     }
 
+    // Backend call to get detailed data from device
     PingDevice() {
-        // this.setState({data : []});
-        fetch("http://192.168.1.218:9000/TCPServer", {
-            headers: {
-                'action': 'pingdevice',
-                'device': this.state.deviceID
-            }
-        })
-            .then(res => res.json())
-            .then(res => this.setState({ data: res }))
-            .then(() => this.setState({deviceChecked : true}));
+        if (this.state.available) {
+            fetch("http://192.168.1.218:9000/TCPServer", {
+                headers: {
+                    'action': 'pingdevice',
+                    'device': this.state.deviceID
+                }
+            })
+                .then(res => res.json())
+                .then(res => this.setState({ data: res }))
+                .then(() => this.setState({deviceChecked : true}));
+        }
     }
 
     render() {
@@ -109,13 +119,9 @@ class DeviceEntry extends React.Component {
                 <Row>
                     <Col className="text-center">
                         <h5 className="align-bottom">{this.props.device.FriendlyName}</h5>
-                        {/*{this.props.device.DeviceID}*/}
                     </Col>
                     <Col className="text-center">
-
-
                         <OverlayTrigger
-                            // trigger="click"
                             key={this.state.DeviceID}
                             delay={{ show: 250, hide: 400 }}
                             placement='right'
@@ -151,21 +157,25 @@ class DeviceEntry extends React.Component {
                                 </Popover>
                             }
                         >
-                            <Button variant={this.state.available ? 'outline-primary' : 'outline-danger'} disabled={!this.state.available}>
-                                {(this.state.data.PMean === undefined) ? (this.state.available) ? 'Loading...' : 'N/A' : parseInt(this.state.data.PMean) + ' W'}
+                            <Button
+                                variant={this.state.available ? 'outline-primary' : 'outline-danger'}
+                                disabled={!this.state.available}
+                            >
+                                {(this.state.data.PMean === undefined) ? (this.state.available) ?
+                                    'Loading...' : 'N/A' : parseInt(this.state.data.PMean) + ' W'}
                             </Button>
-                        </OverlayTrigger>{' '}
+                        </OverlayTrigger>
                     </Col>
                     <Col className="text-center">
                         <Button
-
-                            variant={(this.state.deviceChecked) ? (this.state.available) ? 'success' : 'outline-danger' : 'warning'}>
-                            {(this.state.deviceChecked) ? (this.state.available) ? 'Online' : 'Offline' : 'Loading'}
+                            variant={(this.state.deviceChecked) ? (this.state.available) ?
+                                'success' : 'outline-danger' : 'warning'}>
+                            {(this.state.deviceChecked) ? (this.state.available) ?
+                                'Online' : 'Offline' : 'Loading'}
                         </Button>
                     </Col>
                 </Row>
             </ListGroup.Item>
-
         );
     }
 }

@@ -13,51 +13,7 @@ import "react-datepicker/dist/react-datepicker.css"
 // Custom CSS Import
 import './react-datepicker.css'
 
-
-class CalendarSearch extends React.Component {
-    render() {
-        return (
-            <>
-                <ButtonGroup className="mr-lg-3 ">
-
-                    <InputGroup.Prepend>
-                        <InputGroup.Text id="btnGroupAddon">Start: </InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <DatePicker
-                        selected={this.props.startDate}
-                        onChange={date => this.props.handleStartChange(date)}
-                        selectsStart
-                        startDate={this.props.startDate}
-                        endDate={this.props.endDate}
-                        maxDate={this.props.endDate}
-                        minTime={this.props.minTime}
-                        maxTime={this.props.endDate}
-                        dateFormat="MMMM d, yyyy h:mm aa"
-                    />
-                </ButtonGroup>
-                <ButtonGroup className="my-3 ">
-                    <InputGroup.Prepend>
-                        <InputGroup.Text id="btnGroupAddon">End:</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <DatePicker
-                        selected={this.props.endDate}
-                        onChange={date => this.props.handleEndChange(date)}
-                        selectsEnd
-                        startDate={this.props.startDate}
-                        endDate={this.props.endDate}
-                        minDate={this.props.startDate}
-                        maxDate={new Date()}
-                        maxTime={new Date()}
-                        minTime={this.props.startDate}
-                        dateFormat="MMMM d, yyyy h:mm aa"
-                    />
-                </ButtonGroup>
-                </>
-        );
-    }
-}
-
-
+// Main function to handle history searching
 class history extends React.Component {
     constructor(props) {
         super(props);
@@ -76,9 +32,14 @@ class history extends React.Component {
         this.state.minTime.setTime(0);
 
         this.handleClick = this.handleClick.bind(this);
-
     }
 
+    // On page load, get device list
+    componentDidMount() {
+        this.callDevices();
+    }
+
+    // Back-end call to get friendly name of device for the graph
     getFriendlyName(device) {
         fetch("http://192.168.1.218:9000/getFriendlyName", {
             headers:  {
@@ -89,6 +50,7 @@ class history extends React.Component {
             .then(res => this.setState({ friendlyName: res }));
     }
 
+    // Back-end call to get actual graph data
     getGraphData(devices) {
         console.log(this.state.startDate.toJSON());
         console.log(this.state.startDate.toLocaleDateString());
@@ -103,23 +65,18 @@ class history extends React.Component {
             .then(res => this.setState({ graphData: res }));
     }
 
+    // Back-end call to get list of devices
     callDevices() {
-        fetch("http://192.168.1.218:9000/getDevices", {
-            // headers: new Headers({'devices': this.state.devices.toString()}), header
-        })
+        fetch("http://192.168.1.218:9000/getDevices")
             .then(res => res.json())
             .then(res => this.setState({ devices: res }));
-    }
-
-    componentDidMount() {
-        this.callDevices();
-        this.getGraphData();
     }
 
     // Handle press of dropdown item
     ToggleSearch(DeviceID) {
         let newstate = this.state;
 
+        // determine if a device is selected
         for (const device of newstate.devices) {
             device.selected = device.DeviceID === DeviceID;
         }
@@ -127,13 +84,14 @@ class history extends React.Component {
         this.getFriendlyName(DeviceID);
 
         let activeDevices = [];
-
+        // Push selected device to activeDevices array
         for (const device of this.state.devices) {
             if (device.selected === true) {
                 activeDevices.push(device.DeviceID);
             }
         }
 
+        // Get graph data for selected devices
         this.getGraphData(activeDevices);
 
         this.setState({newstate});
@@ -150,7 +108,7 @@ class history extends React.Component {
             }
         }
 
-       this.getGraphData(testDevices);
+        this.getGraphData(testDevices);
     }
 
     handleStartChange = date => {
@@ -166,6 +124,7 @@ class history extends React.Component {
     };
 
     render() {
+        // Chart configuration
         let response = this.state.graphData;
 
         let labels = response.map(function(e) {
@@ -227,17 +186,18 @@ class history extends React.Component {
                     },
                 }],
                 yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            callback: function(value, index, values) {
-                                return value + " W";
-                            }
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function(value) {
+                            return value + " W";
                         }
+                    }
                 }],
 
             }
         };
 
+        // If a device has been searched, enable and assign a value to the label
         if (this.state.friendlyName[0].FriendlyName !== 'undefined') {
             chart.datasets[0].label = this.state.friendlyName[0].FriendlyName;
             options.legend.display = true;
@@ -247,30 +207,30 @@ class history extends React.Component {
             <div>
                 <h1>Usage History</h1>
                 <hr/>
-                    <ButtonToolbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <CalendarSearch startDate = { this.state.startDate }
-                                   endDate = { this.state.endDate }
-                                   minTime = { this.state.minTime }
-                                   handleStartChange = {e => this.handleStartChange(e) }
-                                   handleEndChange = {e => this.handleEndChange(e) }
-                                   />
+                <ButtonToolbar style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CalendarSearch startDate = { this.state.startDate }
+                                    endDate = { this.state.endDate }
+                                    minTime = { this.state.minTime }
+                                    handleStartChange = {e => this.handleStartChange(e) }
+                                    handleEndChange = {e => this.handleEndChange(e) }
+                    />
 
-                        <Dropdown className='ml-3' as={ButtonGroup}>
-                            <Button variant="light" onClick={this.handleClick}>Search</Button>
-                            <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
-                            <Dropdown.Menu>
-                                {this.state.devices.map(device =>
-                                    <Dropdown.Item
-                                        active = { device.selected }
-                                        key = { device.DeviceID }
-                                        onClick = { () => { this.ToggleSearch(device.DeviceID) } }
-                                    >
-                                        { device.FriendlyName }
-                                    </Dropdown.Item>
-                                )}
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </ButtonToolbar>
+                    <Dropdown className='ml-3' as={ButtonGroup}>
+                        <Button variant="light" onClick={this.handleClick}>Search</Button>
+                        <Dropdown.Toggle split variant="light" id="dropdown-split-basic" />
+                        <Dropdown.Menu>
+                            {this.state.devices.map(device =>
+                                <Dropdown.Item
+                                    active = { device.selected }
+                                    key = { device.DeviceID }
+                                    onClick = { () => { this.ToggleSearch(device.DeviceID) } }
+                                >
+                                    { device.FriendlyName }
+                                </Dropdown.Item>
+                            )}
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </ButtonToolbar>
                 <Container>
                     <Line data={chart} options={options}/>
                 </Container>
@@ -278,6 +238,50 @@ class history extends React.Component {
             </div>
         );
     };
-};
+}
+
+// Handle calendar dropdowns for date range searches
+class CalendarSearch extends React.Component {
+    render() {
+        return (
+            <>
+                <ButtonGroup className="mr-lg-3 ">
+
+                    <InputGroup.Prepend>
+                        <InputGroup.Text id="btnGroupAddon">Start: </InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <DatePicker
+                        selected={this.props.startDate}
+                        onChange={date => this.props.handleStartChange(date)}
+                        selectsStart
+                        startDate={this.props.startDate}
+                        endDate={this.props.endDate}
+                        maxDate={this.props.endDate}
+                        minTime={this.props.minTime}
+                        maxTime={this.props.endDate}
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                    />
+                </ButtonGroup>
+                <ButtonGroup className="my-3 ">
+                    <InputGroup.Prepend>
+                        <InputGroup.Text id="btnGroupAddon">End:</InputGroup.Text>
+                    </InputGroup.Prepend>
+                    <DatePicker
+                        selected={this.props.endDate}
+                        onChange={date => this.props.handleEndChange(date)}
+                        selectsEnd
+                        startDate={this.props.startDate}
+                        endDate={this.props.endDate}
+                        minDate={this.props.startDate}
+                        maxDate={new Date()}
+                        maxTime={new Date()}
+                        minTime={this.props.startDate}
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                    />
+                </ButtonGroup>
+            </>
+        );
+    }
+}
 
 export default history;
