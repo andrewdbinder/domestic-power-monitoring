@@ -7,6 +7,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import Popover from 'react-bootstrap/Popover'
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Table from 'react-bootstrap/Table'
+import config from '../config.json'
 
 // Main component for status/home page
 class Status extends React.Component {
@@ -17,7 +18,7 @@ class Status extends React.Component {
 
     // Call to backend to get current devices
     getDeviceList() {
-        fetch("http://192.168.1.218:9000/getDevices")
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/getDevices")
             .then(res => res.json())
             .then(res => this.setState({ apiResponse: res }))
     }
@@ -87,7 +88,7 @@ class DeviceEntry extends React.Component {
 
     // Back-end call to see if device is online
     CheckAvailable() {
-        fetch("http://192.168.1.218:9000/TCPServer", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/TCPServer", {
             headers: {
                 'action': 'checkavailable',
                 'device': this.state.deviceID
@@ -101,7 +102,7 @@ class DeviceEntry extends React.Component {
     // Backend call to get detailed data from device
     PingDevice() {
         if (this.state.available) {
-            fetch("http://192.168.1.218:9000/TCPServer", {
+            fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/TCPServer", {
                 headers: {
                     'action': 'pingdevice',
                     'device': this.state.deviceID

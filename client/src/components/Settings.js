@@ -8,6 +8,7 @@ import Col from 'react-bootstrap/Col'
 import Form from 'react-bootstrap/Form'
 import ListGroup from 'react-bootstrap/ListGroup'
 import Modal from 'react-bootstrap/Modal'
+import config from '../config.json'
 
 // Main Module definition
 class Settings extends React.Component {
@@ -35,7 +36,7 @@ class Settings extends React.Component {
 
     // Make HTTP request to back-end db, update state
     getDevices() {
-        fetch("http://192.168.1.218:9000/getDevices", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/getDevices", {
             headers: {
                 'active': 'all',
             }
@@ -52,7 +53,7 @@ class Settings extends React.Component {
         // Logic to search for changed devices and save the changes
         for (const device of this.state.dbDeviceState) {
             if (device.newActive !== device.selected) {
-                fetch("http://192.168.1.218:9000/manageDevices", {
+                fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/manageDevices", {
                     headers: {
                         'action': 'changeactive',
                         'deviceid': device.DeviceID,
@@ -248,7 +249,7 @@ class DeleteDevice extends React.Component {
         this.setState( {isLoading: true });
 
         // Make Request to backend
-        fetch("http://192.168.1.218:9000/manageDevices", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/manageDevices", {
             headers:  {
                 'action': 'delete',
                 'device': device
@@ -321,7 +322,7 @@ class AddDevice extends React.Component {
     // Backend call to add device to database
     addDevice(e, deviceID, deviceName) {
         this.setState( {isLoading: true });
-        fetch("http://192.168.1.218:9000/manageDevices", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/manageDevices", {
             headers:  {
                 'action': 'insert',
                 'deviceid': deviceID,

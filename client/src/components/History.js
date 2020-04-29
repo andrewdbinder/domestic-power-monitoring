@@ -7,6 +7,7 @@ import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
 import ButtonToolbar from 'react-bootstrap/ButtonToolbar'
 import InputGroup from 'react-bootstrap/InputGroup'
+import config from '../config.json'
 
 // Import distributed CSS
 import "react-datepicker/dist/react-datepicker.css"
@@ -41,7 +42,7 @@ class history extends React.Component {
 
     // Back-end call to get friendly name of device for the graph
     getFriendlyName(device) {
-        fetch("http://192.168.1.218:9000/getFriendlyName", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/getFriendlyName", {
             headers:  {
                 'device': device
             }
@@ -54,7 +55,7 @@ class history extends React.Component {
     getGraphData(devices) {
         console.log(this.state.startDate.toJSON());
         console.log(this.state.startDate.toLocaleDateString());
-        fetch("http://192.168.1.218:9000/testAPI", {
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/testAPI", {
             headers:  {
                 'startdate': this.state.startDate.toISOString(),
                 'enddate': this.state.endDate.toISOString(),
@@ -67,7 +68,7 @@ class history extends React.Component {
 
     // Back-end call to get list of devices
     callDevices() {
-        fetch("http://192.168.1.218:9000/getDevices")
+        fetch("http://" + config.API.HOST + ":" + config.API.PORT + "/getDevices")
             .then(res => res.json())
             .then(res => this.setState({ devices: res }));
     }
