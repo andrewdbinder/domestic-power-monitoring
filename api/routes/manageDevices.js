@@ -2,13 +2,7 @@ let express = require('express');
 let router = express.Router();
 let mysql = require('mysql');
 
-let powerDB = require('./config');
-
-// Connect to DB
-let connection = powerDB.connection;
-
-// Handle server disconnects
-powerDB.handleDisconnect(connection);
+let db = require('./database');
 
 // Handles control of device table in database
 router.get('/', function (req, res) {
@@ -37,7 +31,7 @@ router.get('/', function (req, res) {
             console.log(action);
     }
 
-    connection.query(mysql.format(sql, params), function (err, result) {
+    db.conn.query(mysql.format(sql, params), function (err, result) {
         res.send([result, err]);
         console.log(err);
     });

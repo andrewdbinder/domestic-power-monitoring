@@ -1,26 +1,19 @@
 let express = require('express');
 let router = express.Router();
-let powerDB = require('./config');
+let db = require('./database');
 let mysql = require('mysql');
+let CONFIG = require('./../config');
 
 // For byte packing
 let Struct = require('struct');
 
 const net = require('net');
-const port = powerDB.TCP_Port;
-const host = powerDB.TCP_Host;
-
-// Connect to DB
-let connection = powerDB.connection;
-
-// Handle server disconnects
-powerDB.handleDisconnect(connection);
 
 // Start TCP Server
 const server = net.createServer();
 
-server.listen(port, host, () => {
-    console.log('TCP Server is running on port ' + port +'.');
+server.listen(CONFIG.TCP_SERVER.PORT, CONFIG.TCP_SERVER.HOST, () => {
+    console.log('TCP Server is running on port ' + CONFIG.TCP_SERVER.PORT +'.');
 });
 
 // Array to hold connections in
@@ -209,7 +202,7 @@ function sendDataToDatabase(data) {
         params.push(sample.power);
 
         // Send query to database
-        connection.query(mysql.format(sql, params));
+        db.conn.query(mysql.format(sql, params));
     })
 }
 
