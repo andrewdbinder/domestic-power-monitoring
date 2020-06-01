@@ -3,6 +3,8 @@
 
 Front-end software used for monitoring power information recorded by custom hardware designed for this project. This was written with Javascript and MySQL, and uses TCP to communicate with micro-controllers embedded in each power monitoring device.
 
+The project was done as the Capstone Engineering Project as required by the Engineering Department at Walla Walla University.
+
 # Installation
 Requires node.js and a MySQL server.
 
