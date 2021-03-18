@@ -5,7 +5,7 @@ Front-end software used for monitoring power information recorded by custom hard
 
 The project was done as the Capstone Engineering Project as required by the Engineering Department at Walla Walla University.
 
-Check out our final paper [here](https://abinder.dev/img/Smart_Domestic_Power_Monitoring.pdf)
+While my portion of the project was software, check out our group's final paper [here](https://abinder.dev/img/Smart_Domestic_Power_Monitoring.pdf).
 
 # Installation
 Requires node.js and a MySQL server.
